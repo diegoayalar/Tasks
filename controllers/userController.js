@@ -54,9 +54,11 @@ exports.deleteUser = async (req, res) => {
                 message: "User not found",
             });
         }
-        res.status(204).json({
+        res.status(200).json({
             status: "success",
-            data: null,
+            data: {
+                user,
+            },
         });
     } catch (err) {
         res.status(500).json({
