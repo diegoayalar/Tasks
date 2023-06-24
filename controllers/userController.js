@@ -10,7 +10,6 @@ exports.createUser = async (req, res) => {
             },
         });
     } catch (err) {
-        //console.log(err)
         res.status(400).json({
             status: "fail",
             message: err,
@@ -40,7 +39,7 @@ exports.updateUser = async (req, res) => {
     } catch (err) {
         res.status(400).json({
             status: "fail",
-            message: "Invalid data sent",
+            message: err,
         });
     }
 };
@@ -61,9 +60,9 @@ exports.deleteUser = async (req, res) => {
             },
         });
     } catch (err) {
-        res.status(500).json({
-            status: "error",
-            message: "Internal server error",
+        res.status(400).json({
+            status: "fail",
+            message: err,
         });
     }
 };
@@ -84,9 +83,9 @@ exports.getUser = async (req, res) => {
             },
         });
     } catch (err) {
-        res.status(500).json({
-            status: "error",
-            message: "Internal server error",
+        res.status(400).json({
+            status: "fail",
+            message: err,
         });
     }
 };
@@ -101,10 +100,10 @@ exports.getUsers = async (req, res) => {
                 users,
             },
         });
-    } catch (error) {
-        res.status(500).json({
+    } catch (err) {
+        res.status(400).json({
             status: "fail",
-            message: error,
+            message: err,
         });
     }
 };

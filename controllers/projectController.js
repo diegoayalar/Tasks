@@ -10,7 +10,6 @@ exports.createProject = async (req, res) => {
             },
         });
     } catch (err) {
-        //console.log(err)
         res.status(400).json({
             status: "fail",
             message: err,
@@ -40,7 +39,7 @@ exports.updateProject = async (req, res) => {
     } catch (err) {
         res.status(400).json({
             status: "fail",
-            message: "Invalid data sent",
+            message: err,
         });
     }
 };
@@ -61,9 +60,9 @@ exports.deleteProject = async (req, res) => {
             },
         });
     } catch (err) {
-        res.status(500).json({
-            status: "error",
-            message: "Internal server error",
+        res.status(400).json({
+            status: "fail",
+            message: err,
         });
     }
 };
@@ -84,9 +83,9 @@ exports.getProject = async (req, res) => {
             },
         });
     } catch (err) {
-        res.status(500).json({
-            status: "error",
-            message: "Internal server error",
+        res.status(400).json({
+            status: "fail",
+            message: err,
         });
     }
 };
@@ -101,10 +100,10 @@ exports.getProjects = async (req, res) => {
                 projects,
             },
         });
-    } catch (error) {
-        res.status(500).json({
+    } catch (err) {
+        res.status(400).json({
             status: "fail",
-            message: error,
+            message: err,
         });
     }
 };
