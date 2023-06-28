@@ -1,3 +1,4 @@
+const ObjectId = require("mongoose").Types.ObjectId;
 const projectModel = require("../models/project");
 const CustomError = require("../utils/customError");
 const asyncErrorHandler = require("../utils/asyncErrorHandler");
@@ -13,7 +14,14 @@ exports.createProject = asyncErrorHandler(async (req, res, next) => {
 });
 
 exports.updateProject = asyncErrorHandler(async (req, res, next) => {
-    const project = await projectModel.findByIdAndUpdate(req.params.id, req.body, {
+    const { id } = req.params;
+
+    if (!ObjectId.isValid(id)) {
+        const error = new CustomError("Invalid Project ID", 400);
+        return next(error);
+    }
+
+    const project = await projectModel.findByIdAndUpdate(id, req.body, {
         new: true,
         runValidators: true,
     });
@@ -30,7 +38,14 @@ exports.updateProject = asyncErrorHandler(async (req, res, next) => {
 });
 
 exports.deleteProject = asyncErrorHandler(async (req, res, next) => {
-    const project = await projectModel.findByIdAndDelete(req.params.id);
+    const { id } = req.params;
+
+    if (!ObjectId.isValid(id)) {
+        const error = new CustomError("Invalid Project ID", 400);
+        return next(error);
+    }
+
+    const project = await projectModel.findByIdAndDelete(id);
     if (!project) {
         const error = new CustomError("Project not found", 404);
         return next(error);
@@ -44,7 +59,14 @@ exports.deleteProject = asyncErrorHandler(async (req, res, next) => {
 });
 
 exports.getProject = asyncErrorHandler(async (req, res, next) => {
-    const project = await projectModel.findById(req.params.id);
+    const { id } = req.params;
+
+    if (!ObjectId.isValid(id)) {
+        const error = new CustomError("Invalid Project ID", 400);
+        return next(error);
+    }
+
+    const project = await projectModel.findById(id);
     if (!project) {
         const error = new CustomError("Project not found", 404);
         return next(error);

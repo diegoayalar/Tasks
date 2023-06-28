@@ -1,3 +1,4 @@
+const ObjectId = require("mongoose").Types.ObjectId;
 const userModel = require("../models/user");
 const CustomError = require("../utils/customError");
 const asyncErrorHandler = require("../utils/asyncErrorHandler");
@@ -13,7 +14,14 @@ exports.createUser = asyncErrorHandler(async (req, res, next) => {
 });
 
 exports.updateUser = asyncErrorHandler(async (req, res, next) => {
-    const user = await userModel.findByIdAndUpdate(req.params.id, req.body, {
+    const { id } = req.params;
+
+    if (!ObjectId.isValid(id)) {
+        const error = new CustomError("Invalid User ID", 400);
+        return next(error);
+    }
+
+    const user = await userModel.findByIdAndUpdate(id, req.body, {
         new: true,
         runValidators: true,
     });
@@ -30,7 +38,14 @@ exports.updateUser = asyncErrorHandler(async (req, res, next) => {
 });
 
 exports.deleteUser = asyncErrorHandler(async (req, res, next) => {
-    const user = await userModel.findByIdAndDelete(req.params.id);
+    const { id } = req.params;
+
+    if (!ObjectId.isValid(id)) {
+        const error = new CustomError("Invalid User ID", 400);
+        return next(error);
+    }
+
+    const user = await userModel.findByIdAndDelete(id);
     if (!user) {
         const error = new CustomError("User not found", 404);
         return next(error);
@@ -44,7 +59,14 @@ exports.deleteUser = asyncErrorHandler(async (req, res, next) => {
 });
 
 exports.getUser = asyncErrorHandler(async (req, res, next) => {
-    const user = await userModel.findById(req.params.id);
+    const { id } = req.params;
+
+    if (!ObjectId.isValid(id)) {
+        const error = new CustomError("Invalid User ID", 400);
+        return next(error);
+    }
+
+    const user = await userModel.findById(id);
     if (!user) {
         const error = new CustomError("User not found", 404);
         return next(error);

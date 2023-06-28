@@ -1,3 +1,4 @@
+const ObjectId = require("mongoose").Types.ObjectId;
 const taskModel = require("../models/task");
 const CustomError = require("../utils/customError");
 const asyncErrorHandler = require("../utils/asyncErrorHandler");
@@ -13,7 +14,14 @@ exports.createTask = asyncErrorHandler(async (req, res, next) => {
 });
 
 exports.updateTask = asyncErrorHandler(async (req, res, next) => {
-    const task = await taskModel.findByIdAndUpdate(req.params.id, req.body, {
+    const { id } = req.params;
+
+    if (!ObjectId.isValid(id)) {
+        const error = new CustomError("Invalid Task ID", 400);
+        return next(error);
+    }
+
+    const task = await taskModel.findByIdAndUpdate(id, req.body, {
         new: true,
         runValidators: true,
     });
@@ -30,7 +38,14 @@ exports.updateTask = asyncErrorHandler(async (req, res, next) => {
 });
 
 exports.deleteTask = asyncErrorHandler(async (req, res, next) => {
-    const task = await taskModel.findByIdAndDelete(req.params.id);
+    const { id } = req.params;
+
+    if (!ObjectId.isValid(id)) {
+        const error = new CustomError("Invalid Task ID", 400);
+        return next(error);
+    }
+
+    const task = await taskModel.findByIdAndDelete(id);
     if (!task) {
         const error = new CustomError("Task not found", 404);
         return next(error);
@@ -44,7 +59,14 @@ exports.deleteTask = asyncErrorHandler(async (req, res, next) => {
 });
 
 exports.getTask = asyncErrorHandler(async (req, res, next) => {
-    const task = await taskModel.findById(req.params.id);
+    const { id } = req.params;
+
+    if (!ObjectId.isValid(id)) {
+        const error = new CustomError("Invalid Task ID", 400);
+        return next(error);
+    }
+
+    const task = await taskModel.findById(id);
     if (!task) {
         const error = new CustomError("Task not found", 404);
         return next(error);
