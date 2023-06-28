@@ -5,12 +5,12 @@ const router = express.Router();
 
 router
     .route("/")
-    .get(projectController.getTasks)
-    .post(projectController.createTask);
+    .get(taskController.getTasks)
+    .post(taskController.createTask);
 router
     .route("/:id")
-    .get(projectController.getTask)
-    .put(projectController.updateTask)
-    .delete(projectController.deleteTask);
+    .get(taskController.getTask)
+    .put(taskController.updateTask)
+    .delete(taskController.deleteTask);
 
 module.exports = router;
