@@ -13,7 +13,7 @@ app.use(express.json());
 
 app.use(
     logger("common", {
-        stream: fs.createWriteStream("./access.log", { flags: "a" }),
+        stream: fs.createWriteStream("./logger.log", { flags: "a" }),
     })
 );
 
