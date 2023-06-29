@@ -3,11 +3,15 @@ const mongoose = require("mongoose");
 const projectSchema = new mongoose.Schema({
     name: {
         type: String,
-        required: true,
+        required: [true, "Name is required"],
+        minlength: [1, "Name should be at least 1 character long"],
+        maxlength: [100, "Name should not exceed 100 characters"],
     },
     description: {
         type: String,
-        required: true,
+        required: false,
+        minlength: [1, "Description should be at least 1 character long"],
+        maxlength: [100, "Description should not exceed 100 characters"],
     },
     dueDate: {
         type: Date,
@@ -21,17 +25,26 @@ const projectSchema = new mongoose.Schema({
     status: {
         type: String,
         enum: ["Open", "Closed"],
-        required: true,
+        required: [true, "Status is required"],
     },
     createdAt: {
         type: Date,
         default: Date.now,
     },
-    tasks: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Task',
-        required: true,
-    }]
+    tasks: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Task",
+            required: true,
+        },
+    ],
+    collaborators: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User",
+            required: true,
+        },
+    ],
 });
 
 const projectModel = mongoose.model("Project", projectSchema);
