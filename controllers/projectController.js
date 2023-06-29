@@ -4,13 +4,20 @@ const CustomError = require("../utils/customError");
 const asyncErrorHandler = require("../utils/asyncErrorHandler");
 
 exports.createProject = asyncErrorHandler(async (req, res, next) => {
-    const newProject = await projectModel.create(req.body);
-    res.status(201).json({
-        status: "sucess",
-        data: {
-            project: newProject,
-        },
-    });
+    try {
+        const newProject = await projectModel.create(req.body);
+        res.status(201).json({
+            status: "sucess",
+            data: {
+                project: newProject,
+            },
+        });
+    } catch (error) {
+        if (error.name === "ValidationError") {
+            const validationError = new CustomError(error.message, 422);
+            return next(validationError);
+        }
+    }
 });
 
 exports.updateProject = asyncErrorHandler(async (req, res, next) => {
@@ -21,20 +28,27 @@ exports.updateProject = asyncErrorHandler(async (req, res, next) => {
         return next(error);
     }
 
-    const project = await projectModel.findByIdAndUpdate(id, req.body, {
-        new: true,
-        runValidators: true,
-    });
-    if (!project) {
-        const error = new CustomError("Project not found", 404);
-        return next(error);
+    try {
+        const project = await projectModel.findByIdAndUpdate(id, req.body, {
+            new: true,
+            runValidators: true,
+        });
+        if (!project) {
+            const error = new CustomError("Project not found", 404);
+            return next(error);
+        }
+        res.status(200).json({
+            status: "success",
+            data: {
+                project,
+            },
+        });
+    } catch (error) {
+        if (error.name === "ValidationError") {
+            const validationError = new CustomError(error.message, 422);
+            return next(validationError);
+        }
     }
-    res.status(200).json({
-        status: "success",
-        data: {
-            project,
-        },
-    });
 });
 
 exports.deleteProject = asyncErrorHandler(async (req, res, next) => {
