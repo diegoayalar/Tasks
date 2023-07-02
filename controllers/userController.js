@@ -4,12 +4,31 @@ const CustomError = require("../utils/customError");
 const asyncErrorHandler = require("../utils/asyncErrorHandler");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const dotenv = require("dotenv");
 
+dotenv.config({ path: "./config.env" });
+
+/**
+ * Generates a JSON Web Token (JWT) for a given user ID.
+ * @param {string} userId - The ID of the user.
+ * @returns {string} JWT token.
+ */
 const generateToken = (userId) => {
-    const token = jwt.sign({ userId }, "2f6a2d411da7481afe8957820128da9c43e8469c0b89bce5ea2a1a056d128eb4", { expiresIn: "1h" });
+    const token = jwt.sign(
+        { userId },
+        process.env.JWT_SECRET, // Access the JWT secret from the environment variable
+        { expiresIn: process.env.JWT_EXPIRES_IN } // Access the JWT expiration from the environment variable
+    );
     return token;
 };
 
+/**
+ * Registers a new user.
+ * @param {Object} req - The request object.
+ * @param {Object} res - The response object.
+ * @param {Function} next - The next middleware function.
+ * @returns {Object} JSON response with registered user and token.
+ */
 exports.signUp = asyncErrorHandler(async (req, res, next) => {
     try {
         const { name, email, password } = req.body;
@@ -41,7 +60,14 @@ exports.signUp = asyncErrorHandler(async (req, res, next) => {
     }
 });
 
-exports.login = asyncErrorHandler(async (req, res, next) => {
+/**
+ * Authenticates a user and generates a JWT token.
+ * @param {Object} req - The request object.
+ * @param {Object} res - The response object.
+ * @param {Function} next - The next middleware function.
+ * @returns {Object} JSON response with authenticated user and token.
+ */
+exports.logIn = asyncErrorHandler(async (req, res, next) => {
     try {
         const { email, password } = req.body;
 
@@ -75,6 +101,13 @@ exports.login = asyncErrorHandler(async (req, res, next) => {
     }
 });
 
+/**
+ * Creates a new user.
+ * @param {Object} req - The request object.
+ * @param {Object} res - The response object.
+ * @param {Function} next - The next middleware function.
+ * @returns {Object} JSON response with created user.
+ */
 exports.createUser = asyncErrorHandler(async (req, res, next) => {
     try {
         const newUser = await userModel.create(req.body);
@@ -92,6 +125,13 @@ exports.createUser = asyncErrorHandler(async (req, res, next) => {
     }
 });
 
+/**
+ * Updates an existing user.
+ * @param {Object} req - The request object.
+ * @param {Object} res - The response object.
+ * @param {Function} next - The next middleware function.
+ * @returns {Object} JSON response with updated user.
+ */
 exports.updateUser = asyncErrorHandler(async (req, res, next) => {
     const { id } = req.params;
 
@@ -123,6 +163,13 @@ exports.updateUser = asyncErrorHandler(async (req, res, next) => {
     }
 });
 
+/**
+ * Deletes an existing user.
+ * @param {Object} req - The request object.
+ * @param {Object} res - The response object.
+ * @param {Function} next - The next middleware function.
+ * @returns {Object} JSON response with deleted user.
+ */
 exports.deleteUser = asyncErrorHandler(async (req, res, next) => {
     const { id } = req.params;
 
@@ -144,6 +191,13 @@ exports.deleteUser = asyncErrorHandler(async (req, res, next) => {
     });
 });
 
+/**
+ * Retrieves a user by ID.
+ * @param {Object} req - The request object.
+ * @param {Object} res - The response object.
+ * @param {Function} next - The next middleware function.
+ * @returns {Object} JSON response with retrieved user.
+ */
 exports.getUser = asyncErrorHandler(async (req, res, next) => {
     const { id } = req.params;
 
@@ -165,9 +219,16 @@ exports.getUser = asyncErrorHandler(async (req, res, next) => {
     });
 });
 
+/**
+ * Retrieves all users from the user model.
+ * @param {Object} req - The request object.
+ * @param {Object} res - The response object.
+ * @param {Function} next - The next middleware function.
+ * @returns {Object} JSON response with user data.
+ */
 exports.getUsers = asyncErrorHandler(async (req, res, next) => {
     const users = await userModel.find();
-    console.log(users);
+
     res.status(200).json({
         status: "success",
         data: {
