@@ -95,7 +95,7 @@ exports.getProject = asyncErrorHandler(async (req, res, next) => {
 
 exports.getProjects = asyncErrorHandler(async (req, res, next) => {
     const projects = await projectModel.find();
-    console.log(projects);
+    
     res.status(200).json({
         status: "success",
         data: {

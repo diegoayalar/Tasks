@@ -95,7 +95,7 @@ exports.getTask = asyncErrorHandler(async (req, res, next) => {
 
 exports.getTasks = asyncErrorHandler(async (req, res, next) => {
     const tasks = await taskModel.find();
-    console.log(tasks);
+
     res.status(200).json({
         status: "success",
         data: {
