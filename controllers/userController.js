@@ -33,6 +33,13 @@ exports.signUp = asyncErrorHandler(async (req, res, next) => {
     try {
         const { name, email, password } = req.body;
 
+        // Check if email already exists
+        const existingUser = await userModel.findOne({ email });
+        if (existingUser) {
+            const error = new CustomError("Email already exists", 422);
+            return next(error);
+        }
+
         // Hash the password
         const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -57,6 +64,7 @@ exports.signUp = asyncErrorHandler(async (req, res, next) => {
             const validationError = new CustomError(error.message, 422);
             return next(validationError);
         }
+        next(error);
     }
 });
 
