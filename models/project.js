@@ -26,6 +26,7 @@ const projectSchema = new mongoose.Schema({
         type: String,
         enum: ["Open", "Closed"],
         required: [true, "Status is required"],
+        default: "Open"
     },
     createdAt: {
         type: Date,
