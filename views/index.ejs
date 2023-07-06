@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Home</title>
+        <link
+            rel="stylesheet"
+            href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
+        />
+        <link rel="stylesheet" href="/styles.css" />
+        <style>
+            .navbar {
+                padding-top: 0.5rem;
+                padding-bottom: 0.5rem;
+            }
+
+            .navbar-brand {
+                font-size: 1.5rem;
+            }
+
+            body {
+                background-color: #f5f5f5;
+            }
+
+            .form-group {
+                margin-bottom: 20px;
+            }
+        </style>
+    </head>
+    <body>
+        <nav class="navbar navbar-expand-sm navbar-dark bg-dark">
+            <div class="container">
+                <a class="navbar-brand" href="/">Home</a>
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item">
+                        <button
+                            id="logoutButton"
+                            class="btn btn-link text-white"
+                        >
+                            Logout
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <div class="container mt-3">
+            <div class="row justify-content-center">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <h2 class="card-title text-center">Home</h2>
+                            <p class="card-text">Welcome to the home page!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            // Function to get the value of a specific cookie
+            function getCookie(name) {
+                const cookieValue = document.cookie.match(
+                    "(^|;)\\s*" + name + "\\s*=\\s*([^;]+)"
+                );
+                return cookieValue ? cookieValue.pop() : "";
+            }
+
+            // Check if the token exists in cookies
+            const token = getCookie("token");
+            if (!token) {
+                // Redirect to the login page if the token is missing
+                window.location.href = "/login";
+            }
+
+            // Add event listener to logout button
+            const logoutButton = document.getElementById("logoutButton");
+            logoutButton.addEventListener("click", function () {
+                // Clear the token from cookies
+                document.cookie =
+                    "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+                // Redirect to the login page
+                window.location.href = "/login";
+            });
+        </script>
+    </body>
+</html>
