@@ -101,8 +101,10 @@
                                 const response = JSON.parse(xhr.responseText);
                                 const token = response.data.token;
                                 const userId = response.data.user._id;
+                                const userName = response.data.user.name;
                                 document.cookie = `token=${token}; path=/; SameSite=None; Secure`;
                                 document.cookie = `userId=${userId}; path=/; SameSite=None; Secure`;
+                                document.cookie = `userName=${userName}; path=/; SameSite=None; Secure`;
                                 window.location.href = "/index";
                             } else if (xhr.status === 401) {
                                 const response = JSON.parse(xhr.responseText);
