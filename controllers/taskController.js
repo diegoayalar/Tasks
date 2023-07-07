@@ -103,3 +103,18 @@ exports.getTasks = asyncErrorHandler(async (req, res, next) => {
         },
     });
 });
+
+exports.getTasksByProject = asyncErrorHandler(async (req, res, next) => {
+    const project = new ObjectId(req.query.projectId);
+
+    const tasks = await taskModel.find({
+        project: project,
+    });
+
+    res.status(200).json({
+        status: "success",
+        data: {
+            tasks,
+        },
+    });
+});
