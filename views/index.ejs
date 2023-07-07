@@ -14,6 +14,9 @@
                 <ul class="navbar-nav mr-auto"></ul>
                 <ul class="navbar-nav ml-auto">
                     <li class="nav-item">
+                        <span id="userName" class="nav-link text-white"></span>
+                    </li>
+                    <li class="nav-item">
                         <button
                             id="logoutButton"
                             class="btn btn-link text-white"
@@ -63,6 +66,7 @@
                         <h5 class="modal-title" id="addProjectModalLabel">
                             Add Project
                         </h5>
+                        <input type="hidden" id="projectId" />
                         <button
                             type="button"
                             class="close"
@@ -137,6 +141,15 @@
         <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
 
         <script>
+            // Get the "Add Project" button element
+            var addProjectButton = document.getElementById("addProjectButton");
+
+            // Add event listener to the button
+            addProjectButton.addEventListener("click", function () {
+                // Call the clearModalFields() function
+                clearModalFields();
+            });
+
             function getCookie(name) {
                 const cookieValue = document.cookie
                     .split(";")
@@ -174,41 +187,149 @@
                 const priority = document.getElementById("priority").value;
                 const status = document.getElementById("status").value;
 
-                // Create the newProject object
+                const projectId = document.getElementById("projectId").value;
+
                 const newProject = {
                     name: projectName,
                     description: projectDescription,
                     createdBy: userId.toString(),
+                    priority: priority,
+                    status: status,
                 };
 
-                // Add the optional fields if they have values
                 if (dueDate) {
                     newProject.dueDate = dueDate;
                 }
 
-                newProject.priority = priority;
-                newProject.status = status;
+                if (projectId) {
+                    // Modify an existing project
+                    const xhr = new XMLHttpRequest();
+                    xhr.open(
+                        "PUT",
+                        `http://localhost:3000/projects/${projectId}`
+                    );
+                    xhr.setRequestHeader("Content-Type", "application/json");
+                    xhr.setRequestHeader("Authorization", token);
+                    xhr.onreadystatechange = function () {
+                        if (xhr.readyState === XMLHttpRequest.DONE) {
+                            if (xhr.status === 200) {
+                                console.log("Project modified successfully");
+                                window.location.reload(); // Refresh the page
+                            } else {
+                                console.error(
+                                    "Error modifying project:",
+                                    xhr.status
+                                );
+                                // Optionally, you can handle the error and display an error message to the user
+                            }
+                        }
+                    };
+                    xhr.send(JSON.stringify(newProject));
+                } else {
+                    // Add a new project
+                    const xhr = new XMLHttpRequest();
+                    xhr.open("POST", "/projects");
+                    xhr.setRequestHeader("Content-Type", "application/json");
+                    xhr.setRequestHeader("Authorization", token);
+                    xhr.onreadystatechange = function () {
+                        if (xhr.readyState === XMLHttpRequest.DONE) {
+                            if (xhr.status === 201) {
+                                console.log("Project added successfully");
+                                window.location.reload(); // Refresh the page
+                            } else {
+                                console.error(
+                                    "Error adding project:",
+                                    xhr.status
+                                );
+                                // Optionally, you can handle the error and display an error message to the user
+                            }
+                        }
+                    };
+                    xhr.send(JSON.stringify(newProject));
+                }
+            });
 
+            function modifyProject(projectId) {
+                const addProjectModalLabel = document.getElementById(
+                    "addProjectModalLabel"
+                );
+                addProjectModalLabel.textContent = "Modify Project";
+
+                const projectIdInput = document.getElementById("projectId");
+                projectIdInput.value = projectId;
+
+                const submitButton = document.querySelector(
+                    ".modal-body button[type='submit']"
+                );
+                submitButton.textContent = "Modify";
+
+                // Fetch the project data using the project ID
                 const xhr = new XMLHttpRequest();
-                xhr.open("POST", "/projects");
+                xhr.open("GET", `http://localhost:3000/projects/${projectId}`);
                 xhr.setRequestHeader("Content-Type", "application/json");
                 xhr.setRequestHeader("Authorization", token);
                 xhr.onreadystatechange = function () {
                     if (xhr.readyState === XMLHttpRequest.DONE) {
-                        if (xhr.status === 201) {
-                            console.log("Project added successfully");
-                            window.location.reload(); // Refresh the page
+                        if (xhr.status === 200) {
+                            const project = JSON.parse(xhr.responseText);
+
+                            // Prepopulate the form fields with the project data
+                            document.getElementById("projectName").value =
+                                project.data.project.name || "";
+                            document.getElementById(
+                                "projectDescription"
+                            ).value = project.data.project.description || "";
+                            document.getElementById("dueDate").value = project
+                                .data.project.dueDate
+                                ? project.data.project.dueDate.split("T")[0]
+                                : "";
+                            document.getElementById("priority").value =
+                                project.data.project.priority || "";
+                            document.getElementById("status").value =
+                                project.data.project.status || "";
+
+                            // Show the modal
+                            $("#addProjectModal").modal("show");
                         } else {
-                            console.error("Error adding project:", xhr.status);
+                            console.error(
+                                "Error fetching project:",
+                                xhr.status
+                            );
                             // Optionally, you can handle the error and display an error message to the user
                         }
                     }
                 };
-                xhr.send(JSON.stringify(newProject));
-            });
+                xhr.send();
+            }
 
-            // Function to fetch projects and display them
-            // Function to fetch projects and display them
+            function deleteProject(projectId) {
+                // Show confirmation modal
+                if (confirm("Are you sure you want to delete this project?")) {
+                    const xhr = new XMLHttpRequest();
+                    xhr.open(
+                        "DELETE",
+                        `http://localhost:3000/projects/${projectId}`
+                    );
+                    xhr.setRequestHeader("Content-Type", "application/json");
+                    xhr.setRequestHeader("Authorization", token);
+                    xhr.onreadystatechange = function () {
+                        if (xhr.readyState === XMLHttpRequest.DONE) {
+                            if (xhr.status === 200) {
+                                console.log("Project deleted successfully");
+                                fetchProjects(); // Refresh the project list after deletion
+                            } else {
+                                console.error(
+                                    "Error deleting project:",
+                                    xhr.status
+                                );
+                                // Optionally, you can handle the error and display an error message to the user
+                            }
+                        }
+                    };
+                    xhr.send();
+                }
+            }
+
             function fetchProjects() {
                 const xhr = new XMLHttpRequest();
                 xhr.open(
@@ -222,13 +343,9 @@
                         if (xhr.status === 200) {
                             let projects = JSON.parse(xhr.responseText);
 
-                            // Sort the projects by title (A-Z) and then by status
+                            // Sort the projects by status (Open first) and then by title (A-Z)
                             projects.data.projects.sort((a, b) => {
-                                // Sort by title (A-Z)
-                                if (a.name < b.name) return -1;
-                                if (a.name > b.name) return 1;
-
-                                // If titles are the same, sort by status (Open first)
+                                // Sort by status (Open first)
                                 if (
                                     a.status === "Open" &&
                                     b.status === "Closed"
@@ -238,6 +355,12 @@
                                     a.status === "Closed" &&
                                     b.status === "Open"
                                 )
+                                    return 1;
+
+                                // If statuses are the same, sort by title (A-Z)
+                                if (a.name.toLowerCase() < b.name.toLowerCase())
+                                    return -1;
+                                if (a.name.toLowerCase() > b.name.toLowerCase())
                                     return 1;
 
                                 return 0;
@@ -272,22 +395,122 @@
                                 projectDescription.textContent =
                                     project.description;
 
+                                const projectDueDate =
+                                    document.createElement("p");
+                                projectDueDate.classList.add("card-text");
+                                if (project.dueDate) {
+                                    const dueDate = new Date(project.dueDate);
+                                    const formattedDueDate = dueDate
+                                        .toISOString()
+                                        .split("T")[0];
+                                    projectDueDate.textContent =
+                                        "Due Date: " + formattedDueDate;
+                                }
+
                                 const projectStatus =
                                     document.createElement("p");
                                 projectStatus.classList.add("card-text");
 
                                 // Set status and color based on "Open" or "Closed"
-                                projectStatus.textContent =
-                                    "Status: " + project.status;
+                                projectStatus.textContent = project.status;
                                 if (project.status === "Open") {
                                     projectStatus.style.color = "green";
                                 } else {
                                     projectStatus.style.color = "red";
                                 }
 
+                                const tasksButton =
+                                    document.createElement("button");
+                                tasksButton.classList.add(
+                                    "btn",
+                                    "btn-secondary",
+                                    "mr-2"
+                                );
+                                tasksButton.textContent = "Tasks";
+                                tasksButton.addEventListener(
+                                    "click",
+                                    function () {
+                                        // Get the project ID
+                                        const projectId = project._id;
+
+                                        // Save the project ID as a cookie
+                                        document.cookie = `selectedProjectId=${projectId}; path=/`;
+
+                                        // Create a new XHR object
+                                        const xhr = new XMLHttpRequest();
+
+                                        // Set up the XHR request
+                                        xhr.open(
+                                            "GET",
+                                            `tasks/project?projectId=${projectId}`
+                                        );
+                                        xhr.setRequestHeader(
+                                            "Content-Type",
+                                            "application/json"
+                                        );
+                                        xhr.setRequestHeader(
+                                            "Authorization",
+                                            getCookie("token")
+                                        ); // Add the Authorization header
+
+                                        // Handle the response
+                                        xhr.onreadystatechange = function () {
+                                            if (
+                                                xhr.readyState ===
+                                                XMLHttpRequest.DONE
+                                            ) {
+                                                if (xhr.status === 200) {
+                                                    // Redirect to the "/tasks" page
+                                                    window.location.href = `/tasks`;
+                                                } else {
+                                                    // Handle the error or redirect to the login page
+                                                    window.location.href =
+                                                        "/login";
+                                                }
+                                            }
+                                        };
+
+                                        // Send the XHR request
+                                        xhr.send();
+                                    }
+                                );
+
+                                const modifyButton =
+                                    document.createElement("button");
+                                modifyButton.classList.add(
+                                    "btn",
+                                    "btn-primary",
+                                    "mr-2"
+                                );
+
+                                modifyButton.textContent = "Modify";
+                                modifyButton.addEventListener(
+                                    "click",
+                                    function () {
+                                        modifyProject(project._id);
+                                    }
+                                );
+
+                                const deleteButton =
+                                    document.createElement("button");
+                                deleteButton.classList.add("btn", "btn-danger");
+                                deleteButton.textContent = "Delete";
+                                deleteButton.addEventListener(
+                                    "click",
+                                    function () {
+                                        deleteProject(project._id);
+                                    }
+                                );
+
                                 projectCardBody.appendChild(projectName);
                                 projectCardBody.appendChild(projectDescription);
+                                if (project.dueDate) {
+                                    projectCardBody.appendChild(projectDueDate);
+                                }
                                 projectCardBody.appendChild(projectStatus);
+                                projectCardBody.appendChild(tasksButton);
+                                projectCardBody.appendChild(modifyButton);
+                                projectCardBody.appendChild(deleteButton);
                                 projectCard.appendChild(projectCardBody);
                                 projectList.appendChild(projectCard);
                             });
@@ -307,6 +530,14 @@
             document.addEventListener("DOMContentLoaded", function () {
                 fetchProjects();
             });
+
+            function clearModalFields() {
+                document.getElementById("projectName").value = "";
+                document.getElementById("projectDescription").value = "";
+                document.getElementById("dueDate").value = "";
+                document.getElementById("priority").selectedIndex = 1;
+                document.getElementById("status").selectedIndex = 0;
+            }
         </script>
     </body>
 </html>
