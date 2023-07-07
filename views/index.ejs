@@ -208,6 +208,7 @@
             });
 
             // Function to fetch projects and display them
+            // Function to fetch projects and display them
             function fetchProjects() {
                 const xhr = new XMLHttpRequest();
                 xhr.open(
@@ -220,6 +221,27 @@
                     if (xhr.readyState === XMLHttpRequest.DONE) {
                         if (xhr.status === 200) {
                             let projects = JSON.parse(xhr.responseText);
+
+                            // Sort the projects by title (A-Z) and then by status
+                            projects.data.projects.sort((a, b) => {
+                                // Sort by title (A-Z)
+                                if (a.name < b.name) return -1;
+                                if (a.name > b.name) return 1;
+
+                                // If titles are the same, sort by status (Open first)
+                                if (
+                                    a.status === "Open" &&
+                                    b.status === "Closed"
+                                )
+                                    return -1;
+                                if (
+                                    a.status === "Closed" &&
+                                    b.status === "Open"
+                                )
+                                    return 1;
+
+                                return 0;
+                            });
 
                             console.log(projects);
 
@@ -250,8 +272,22 @@
                                 projectDescription.textContent =
                                     project.description;
 
+                                const projectStatus =
+                                    document.createElement("p");
+                                projectStatus.classList.add("card-text");
+
+                                // Set status and color based on "Open" or "Closed"
+                                projectStatus.textContent =
+                                    "Status: " + project.status;
+                                if (project.status === "Open") {
+                                    projectStatus.style.color = "green";
+                                } else {
+                                    projectStatus.style.color = "red";
+                                }
+
                                 projectCardBody.appendChild(projectName);
                                 projectCardBody.appendChild(projectDescription);
+                                projectCardBody.appendChild(projectStatus);
                                 projectCard.appendChild(projectCardBody);
                                 projectList.appendChild(projectCard);
                             });
