@@ -26,7 +26,7 @@ const projectSchema = new mongoose.Schema({
         type: String,
         enum: ["Open", "Closed"],
         required: [true, "Status is required"],
-        default: "Open"
+        default: "Open",
     },
     createdAt: {
         type: Date,
@@ -39,13 +39,11 @@ const projectSchema = new mongoose.Schema({
             required: true,
         },
     ],
-    collaborators: [
-        {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "User",
-            required: true,
-        },
-    ],
+    createdBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        required: true,
+    },
 });
 
 const projectModel = mongoose.model("Project", projectSchema);
