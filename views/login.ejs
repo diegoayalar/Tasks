@@ -71,10 +71,10 @@
                 return cookieValue ? cookieValue.pop() : "";
             }
 
-            // Check if the token exists in cookies and the current page is not the login page
+            // Check if the token is missing in cookies and the current page is not the login page
             const token = getCookie("token");
-            if (token && window.location.pathname === "/login") {
-                // Redirect to the index page if the token exists
+            if (token) {
+                // Redirect to the login page if the token is missing and the current page is not the login page
                 window.location.href = "/index";
             }
 
@@ -101,7 +101,8 @@
                                 const response = JSON.parse(xhr.responseText);
                                 const token = response.data.token;
                                 const userId = response.data.user._id;
-                                document.cookie = `token=${token}; userId=${userId}; path=/; SameSite=None; Secure`;
+                                document.cookie = `token=${token}; path=/; SameSite=None; Secure`;
+                                document.cookie = `userId=${userId}; path=/; SameSite=None; Secure`;
                                 window.location.href = "/index";
                             } else if (xhr.status === 401) {
                                 const response = JSON.parse(xhr.responseText);
