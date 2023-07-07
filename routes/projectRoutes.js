@@ -8,6 +8,9 @@ router
     .route("/")
     .get(protectRoute, projectController.getProjects)
     .post(protectRoute, projectController.createProject);
+
+router.get("/user", protectRoute, projectController.getProjectsByUser);
+
 router
     .route("/:id")
     .get(protectRoute, projectController.getProject)
