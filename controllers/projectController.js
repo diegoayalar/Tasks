@@ -7,7 +7,7 @@ exports.createProject = asyncErrorHandler(async (req, res, next) => {
     try {
         const newProject = await projectModel.create(req.body);
         res.status(201).json({
-            status: "sucess",
+            status: "success",
             data: {
                 project: newProject,
             },
@@ -95,7 +95,22 @@ exports.getProject = asyncErrorHandler(async (req, res, next) => {
 
 exports.getProjects = asyncErrorHandler(async (req, res, next) => {
     const projects = await projectModel.find();
-    
+
+    res.status(200).json({
+        status: "success",
+        data: {
+            projects,
+        },
+    });
+});
+
+exports.getProjectsByUser = asyncErrorHandler(async (req, res, next) => {
+    const createdBy = new ObjectId(req.query.createdBy)
+
+    const projects = await projectModel.find({
+        createdBy: createdBy
+    });
+
     res.status(200).json({
         status: "success",
         data: {
