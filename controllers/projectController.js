@@ -105,10 +105,10 @@ exports.getProjects = asyncErrorHandler(async (req, res, next) => {
 });
 
 exports.getProjectsByUser = asyncErrorHandler(async (req, res, next) => {
-    const createdBy = new ObjectId(req.query.createdBy)
+    const createdBy = new ObjectId(req.query.createdBy);
 
     const projects = await projectModel.find({
-        createdBy: createdBy
+        createdBy: createdBy,
     });
 
     res.status(200).json({
