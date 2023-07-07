@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Home</title>
+        <link
+            rel="stylesheet"
+            href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
+        />
+    </head>
+
+    <body>
+        <nav class="navbar navbar-expand-sm navbar-dark bg-dark">
+            <div class="container">
+                <a class="navbar-brand" href="/index">Home</a>
+                <ul class="navbar-nav mr-auto"></ul>
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item">
+                        <span id="userName" class="nav-link text-white"></span>
+                    </li>
+                    <li class="nav-item">
+                        <button
+                            id="logoutButton"
+                            class="btn btn-link text-white"
+                        >
+                            Log out
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <div class="container mt-3">
+            <div class="row justify-content-center">
+                <div class="col-md-6">
+                    <div
+                        class="d-flex justify-content-start align-items-center mb-3"
+                    >
+                        <button
+                            id="addTaskButton"
+                            class="btn btn-primary"
+                            data-toggle="modal"
+                            data-target="#addTaskModal"
+                        >
+                            Add Task
+                        </button>
+                    </div>
+                    <h4 id="projectTasks">Project Tasks</h4>
+                    <div id="taskList" class="mt-3">
+                        <!-- Tasks will be dynamically added here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Task Modal -->
+        <!-- Add Task Modal -->
+        <div
+            class="modal fade"
+            id="addTaskModal"
+            tabindex="-1"
+            role="dialog"
+            aria-labelledby="addTaskModalLabel"
+            aria-hidden="true"
+        >
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="addTaskModalLabel">
+                            Add Task
+                        </h5>
+                        <input type="hidden" id="taskId" />
+                        <button
+                            type="button"
+                            class="close"
+                            data-dismiss="modal"
+                            aria-label="Close"
+                        >
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="addTaskForm">
+                            <div class="form-group">
+                                <label for="taskTitle">Title</label>
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    id="taskTitle"
+                                    placeholder="Enter task title"
+                                    required
+                                    minlength="1"
+                                    maxlength="100"
+                                />
+                            </div>
+                            <div class="form-group">
+                                <label for="taskDescription">Description</label>
+                                <textarea
+                                    class="form-control"
+                                    id="taskDescription"
+                                    rows="3"
+                                    placeholder="Enter task description"
+                                    required
+                                    minlength="1"
+                                    maxlength="100"
+                                ></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="taskDueDate">Due Date</label>
+                                <input
+                                    type="date"
+                                    class="form-control"
+                                    id="taskDueDate"
+                                />
+                            </div>
+                            <div class="form-group">
+                                <label for="taskStatus">Status</label>
+                                <select class="form-control" id="taskStatus">
+                                    <option value="Pending" selected>
+                                        Pending
+                                    </option>
+                                    <option value="InProgress">
+                                        In Progress
+                                    </option>
+                                    <option value="Completed">Completed</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="taskPriority">Priority</label>
+                                <select class="form-control" id="taskPriority">
+                                    <option value="High">High</option>
+                                    <option value="Medium" selected>
+                                        Medium
+                                    </option>
+                                    <option value="Low">Low</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                Add
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+
+        <script>
+            // Get the "Add Task" button element
+            var addTaskButton = document.getElementById("addTaskButton");
+
+            // Add event listener to the button
+            addTaskButton.addEventListener("click", function () {
+                // Call the clearModalFields() function
+                clearModalFields();
+            });
+
+            // Get the "Home" link element
+            const homeLink = document.querySelector(
+                'a.navbar-brand[href="/index"]'
+            );
+
+            // Add a click event to the "Home" link
+            homeLink.addEventListener("click", function (event) {
+                // Prevent the default behavior of the link
+                event.preventDefault();
+
+                // Delete the "selectedProjectId" cookie
+                document.cookie =
+                    "selectedProjectId=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=None; Secure";
+
+                // Redirect to the "/index" page
+                window.location.href = "/index";
+            });
+
+            function getCookie(name) {
+                const cookieValue = document.cookie
+                    .split(";")
+                    .map((cookie) => cookie.split("="))
+                    .reduce((acc, [key, value]) => {
+                        acc[key.trim()] = decodeURIComponent(value.trim());
+                        return acc;
+                    }, {});
+
+                return cookieValue[name] || "";
+            }
+
+            const token = getCookie("token");
+            const userId = getCookie("userId");
+            if (!token) {
+                window.location.href = "/login";
+            }
+
+            const logoutButton = document.getElementById("logoutButton");
+            logoutButton.addEventListener("click", function () {
+                document.cookie =
+                    "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=None; Secure";
+                window.location.href = "/login";
+            });
+
+            const addTaskForm = document.getElementById("addTaskForm");
+            addTaskForm.addEventListener("submit", function (event) {
+                event.preventDefault();
+
+                const taskTitle = document.getElementById("taskTitle").value;
+                const taskDescription =
+                    document.getElementById("taskDescription").value;
+                const taskDueDate =
+                    document.getElementById("taskDueDate").value;
+                const taskStatus = document.getElementById("taskStatus").value;
+                const taskPriority =
+                    document.getElementById("taskPriority").value;
+
+                const taskId = document.getElementById("taskId").value;
+
+                const newTask = {
+                    title: taskTitle,
+                    description: taskDescription,
+                    project: getCookie("selectedProjectId"),
+                    status: taskStatus,
+                    priority: taskPriority,
+                };
+
+                if (taskDueDate) {
+                    newTask.dueDate = taskDueDate;
+                }
+
+                if (taskId) {
+                    // Modify an existing task
+                    const xhr = new XMLHttpRequest();
+                    xhr.open("PUT", `http://localhost:3000/tasks/${taskId}`);
+                    xhr.setRequestHeader("Content-Type", "application/json");
+                    xhr.setRequestHeader("Authorization", token);
+                    xhr.onreadystatechange = function () {
+                        if (xhr.readyState === XMLHttpRequest.DONE) {
+                            if (xhr.status === 200) {
+                                console.log("Task modified successfully");
+                                window.location.reload(); // Refresh the page
+                            } else {
+                                console.error(
+                                    "Error modifying task:",
+                                    xhr.status
+                                );
+                                // Optionally, you can handle the error and display an error message to the user
+                            }
+                        }
+                    };
+                    xhr.send(JSON.stringify(newTask));
+                } else {
+                    // Add a new task
+                    const xhr = new XMLHttpRequest();
+                    xhr.open("POST", "/tasks");
+                    xhr.setRequestHeader("Content-Type", "application/json");
+                    xhr.setRequestHeader("Authorization", token);
+                    xhr.onreadystatechange = function () {
+                        if (xhr.readyState === XMLHttpRequest.DONE) {
+                            if (xhr.status === 201) {
+                                console.log("Task added successfully");
+                                window.location.reload(); // Refresh the page
+                            } else {
+                                console.error("Error adding task:", xhr.status);
+                                // Optionally, you can handle the error and display an error message to the user
+                            }
+                        }
+                    };
+                    xhr.send(JSON.stringify(newTask));
+                }
+            });
+
+            function modifyTask(taskId) {
+                const addTaskModalLabel =
+                    document.getElementById("addTaskModalLabel");
+                addTaskModalLabel.textContent = "Modify Task";
+
+                const taskIdInput = document.getElementById("taskId");
+                taskIdInput.value = taskId;
+
+                const submitButton = document.querySelector(
+                    ".modal-body button[type='submit']"
+                );
+                submitButton.textContent = "Modify";
+
+                // Fetch the task data using the task ID
+                const xhr = new XMLHttpRequest();
+                xhr.open("GET", `http://localhost:3000/tasks/${taskId}`);
+                xhr.setRequestHeader("Content-Type", "application/json");
+                xhr.setRequestHeader("Authorization", token);
+                xhr.onreadystatechange = function () {
+                    if (xhr.readyState === XMLHttpRequest.DONE) {
+                        if (xhr.status === 200) {
+                            const task = JSON.parse(xhr.responseText);
+
+                            // Prepopulate the form fields with the task data
+                            document.getElementById("taskTitle").value =
+                                task.data.task.title || "";
+                            document.getElementById("taskDescription").value =
+                                task.data.task.description || "";
+                            document.getElementById("taskDueDate").value =
+                                task.data.task.dueDate.split("T")[0] || "";
+                            document.getElementById("taskStatus").value =
+                                task.data.task.status || "Pending";
+                            document.getElementById("taskPriority").value =
+                                task.data.task.priority || "Medium";
+
+                            // Show the modal
+                            $("#addTaskModal").modal("show");
+                        } else {
+                            console.error("Error fetching task:", xhr.status);
+                            // Optionally, you can handle the error and display an error message to the user
+                        }
+                    }
+                };
+                xhr.send();
+            }
+
+            function deleteTask(taskId) {
+                // Show confirmation modal
+                if (confirm("Are you sure you want to delete this task?")) {
+                    const xhr = new XMLHttpRequest();
+                    xhr.open("DELETE", `http://localhost:3000/tasks/${taskId}`);
+                    xhr.setRequestHeader("Content-Type", "application/json");
+                    xhr.setRequestHeader("Authorization", token);
+                    xhr.onreadystatechange = function () {
+                        if (xhr.readyState === XMLHttpRequest.DONE) {
+                            if (xhr.status === 200) {
+                                console.log("Task deleted successfully");
+                                fetchTasks(); // Refresh the task list after deletion
+                            } else {
+                                console.error(
+                                    "Error deleting task:",
+                                    xhr.status
+                                );
+                                // Optionally, you can handle the error and display an error message to the user
+                            }
+                        }
+                    };
+                    xhr.send();
+                }
+            }
+
+            function fetchTasks() {
+                const projectId = getCookie("selectedProjectId");
+                const xhr = new XMLHttpRequest();
+                xhr.open("GET", `tasks/project?projectId=${projectId}`);
+                xhr.setRequestHeader("Content-Type", "application/json");
+                xhr.setRequestHeader("Authorization", token);
+                xhr.onreadystatechange = function () {
+                    if (xhr.readyState === XMLHttpRequest.DONE) {
+                        if (xhr.status === 200) {
+                            const tasks = JSON.parse(xhr.responseText);
+                            const sortedTasks = tasks.data.tasks.sort(
+                                (a, b) => {
+                                    const statusOrder = {
+                                        InProgress: 0,
+                                        Pending: 1,
+                                        Completed: 2,
+                                    };
+                                    const statusA = a.status;
+                                    const statusB = b.status;
+                                    if (
+                                        statusOrder[statusA] <
+                                        statusOrder[statusB]
+                                    ) {
+                                        return -1;
+                                    } else if (
+                                        statusOrder[statusA] >
+                                        statusOrder[statusB]
+                                    ) {
+                                        return 1;
+                                    } else {
+                                        return a.title.localeCompare(b.title);
+                                    }
+                                }
+                            );
+                            const taskList =
+                                document.getElementById("taskList");
+                            taskList.innerHTML = "";
+                            console.log(sortedTasks);
+                            sortedTasks.forEach((task) => {
+                                const taskCard = document.createElement("div");
+                                taskCard.classList.add("card", "mb-3");
+
+                                const taskCardBody =
+                                    document.createElement("div");
+                                taskCardBody.classList.add("card-body");
+
+                                const taskTitle = document.createElement("h5");
+                                taskTitle.classList.add("card-title");
+                                taskTitle.textContent = task.title;
+
+                                const taskDescription =
+                                    document.createElement("p");
+                                taskDescription.classList.add("card-text");
+                                taskDescription.textContent = task.description;
+
+                                const taskDueDate = document.createElement("p");
+                                taskDueDate.classList.add("card-text");
+                                if (task.dueDate) {
+                                    const dueDate = new Date(task.dueDate);
+                                    const formattedDueDate = dueDate
+                                        .toISOString()
+                                        .split("T")[0];
+                                    taskDueDate.textContent =
+                                        "Due Date: " + formattedDueDate;
+                                }
+
+                                const taskStatus = document.createElement("p");
+                                taskStatus.classList.add("card-text");
+
+                                taskStatus.textContent = task.status;
+                                if (task.status === "Completed") {
+                                    taskStatus.style.color = "green";
+                                } else if (task.status === "InProgress") {
+                                    taskStatus.style.color = "orange";
+                                } else {
+                                    taskStatus.style.color = "red";
+                                }
+
+                                const modifyButton =
+                                    document.createElement("button");
+                                modifyButton.classList.add(
+                                    "btn",
+                                    "btn-primary",
+                                    "mr-2"
+                                );
+                                modifyButton.textContent = "Modify";
+                                modifyButton.addEventListener(
+                                    "click",
+                                    function () {
+                                        modifyTask(task._id);
+                                    }
+                                );
+
+                                const deleteButton =
+                                    document.createElement("button");
+                                deleteButton.classList.add("btn", "btn-danger");
+                                deleteButton.textContent = "Delete";
+                                deleteButton.addEventListener(
+                                    "click",
+                                    function () {
+                                        deleteTask(task._id);
+                                    }
+                                );
+
+                                taskCardBody.appendChild(taskTitle);
+                                taskCardBody.appendChild(taskDescription);
+                                taskCardBody.appendChild(taskStatus);
+                                taskCardBody.appendChild(taskDueDate);
+                                taskCardBody.appendChild(modifyButton);
+                                taskCardBody.appendChild(deleteButton);
+                                taskCard.appendChild(taskCardBody);
+                                taskList.appendChild(taskCard);
+                            });
+                        } else {
+                            console.error("Error fetching tasks:", xhr.status);
+                            // Optionally, you can handle the error and display an error message to the user
+                        }
+                    }
+                };
+                xhr.send();
+            }
+
+            // Call the fetchTasks function when the page loads
+            document.addEventListener("DOMContentLoaded", function () {
+                fetchTasks();
+            });
+
+            function clearModalFields() {
+                document.getElementById("taskTitle").value = "";
+                document.getElementById("taskDescription").value = "";
+                document.getElementById("taskDueDate").value = "";
+                document.getElementById("taskPriority").selectedIndex = 1;
+                document.getElementById("taskStatus").selectedIndex = 0;
+            }
+        </script>
+    </body>
+</html>
