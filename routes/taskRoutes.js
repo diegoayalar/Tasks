@@ -8,6 +8,9 @@ router
     .route("/")
     .get(protectRoute, taskController.getTasks)
     .post(protectRoute, taskController.createTask);
+
+    router.get("/project", protectRoute, taskController.getTasksByProject);
+
 router
     .route("/:id")
     .get(protectRoute, taskController.getTask)
